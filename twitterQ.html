@@ -19,7 +19,7 @@ function initialize() {
 }
 
 function getSentence(snippet) {
-  var sentence = snippet.match(/<br>(.+?)</)[1];
+  var sentence = snippet.match(/<br>(.+?)<a /)[1];
   sentence = sentence.replaceAll(/<br>/g, "");
   return sentence;
 }
