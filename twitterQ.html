@@ -1,0 +1,106 @@
+<html>
+<head id="head">
+</head>
+<body onload="initialize();">
+埋め込みツイートの内容をペーストし、［処理］をクリック：<br>
+<textarea id="inputArea" rows="3" cols="20"></textarea><br>
+<input type="button" id="processButton" value="処理" onClick="embedLink();">
+
+<div id="hMarker"></div>
+<div id="aArea"></div>
+<div id="tMarker"></div>
+
+<script>
+var idno = 1;
+var pattern = /\( +?\)/;
+
+function initialize() {
+  document.getElementById("inputArea").focus();
+}
+
+function getSentence(snippet) {
+  var sentence = snippet.match(/<br>(.+?)</)[1];
+  sentence = sentence.replaceAll(/<br>/g, "");
+  return sentence;
+}
+
+function getCodeSnippet() {
+  var codeSnippet = document.getElementById("inputArea").value;
+  codeSnippet = codeSnippet.replace(/<script .+$/, "");
+  return codeSnippet;
+}
+
+function embedLink() {
+  document.getElementById("processButton").disabled = true;
+  var codeSnippet = getCodeSnippet();
+  var sentence = getSentence(codeSnippet);
+
+  while (sentence.search(pattern) != -1) {
+    var rstr =  '<input type="text" autocomplete="off" size="4" value="" id="c' + idno + '" onfocus="this.select();" oninput="inputChar(' + idno + ');">';
+    idno += 1;
+    sentence = sentence.replace(pattern, rstr);
+  }
+
+  var hmarker = document.getElementById("hMarker")
+
+  var question = document.createElement("p");
+  question.innerHTML = sentence;
+  hmarker.appendChild(question);
+  var copyButton = document.createElement("input");
+  copyButton.type = "button";
+  copyButton.value = "Finish";
+  copyButton.onclick = function () {
+    processAnswers();
+  };
+  hmarker.appendChild(copyButton);
+
+  var tmarker = document.getElementById("tMarker")
+
+  var data = document.createElement("p");
+  data.innerHTML = codeSnippet;
+  tmarker.appendChild(data);
+
+  var sc = document.createElement('script');
+  sc.setAttribute('type', 'text/javascript');
+  sc.setAttribute('src', "https://platform.twitter.com/widgets.js");
+  document.getElementById('head').appendChild(sc);
+
+  document.getElementById("c1").focus();
+}
+
+function processAnswers() {
+  var area = document.getElementById("aArea");
+  while(area.firstChild) {
+    area.removeChild(area.lastChild);
+  }
+  var result = "";
+  for (i = 1; i < idno; i++) {
+    result += "(" + document.getElementById("c" + i).value + ") ";
+  }
+  var text = document.createTextNode(result);
+  area.appendChild(text);
+  area.appendChild(document.createElement("hr"));
+
+  var originalQ = getSentence(getCodeSnippet());
+  for (i = 1; i < idno; i++) {
+    originalQ = originalQ.replace(pattern, "(" + document.getElementById("c" + i).value + ")");
+  }
+  area.appendChild(document.createTextNode(originalQ));
+}
+
+function inputChar(currentId) {
+  var elem = document.getElementById("c" + currentId);
+  var val = elem.value;
+  if (val == "") return;
+  if (val.charAt(val.length-1) == " ") {
+    elem.value = val.trim();
+    var nextId = currentId + 1;
+    nextId = (nextId >= idno) ? 1 : nextId;
+    document.getElementById("c" + nextId).focus();
+  } else {
+    elem.size = Math.max(val.length, 1);
+  }
+}
+</script>
+</body>
+</html>
