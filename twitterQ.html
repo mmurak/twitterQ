@@ -24,15 +24,16 @@ function getSentence(snippet) {
   return sentence;
 }
 
-function getCodeSnippet() {
-  var codeSnippet = document.getElementById("inputArea").value;
-  codeSnippet = codeSnippet.replace(/<script .+$/, "");
-  return codeSnippet;
+function getCodeSnippet(iarea) {
+  iarea = iarea.replace(/<script .+$/, "");
+  return iarea;
 }
 
 function embedLink() {
   document.getElementById("processButton").disabled = true;
-  var codeSnippet = getCodeSnippet();
+  var iarea = document.getElementById("inputArea").value;
+  if (iarea == "") return;
+  var codeSnippet = getCodeSnippet(iarea);
   var sentence = getSentence(codeSnippet);
 
   while (sentence.search(pattern) != -1) {
@@ -81,7 +82,8 @@ function processAnswers() {
   area.appendChild(text);
   area.appendChild(document.createElement("hr"));
 
-  var originalQ = getSentence(getCodeSnippet());
+  var iarea = document.getElementById("inputArea").value;
+  var originalQ = getSentence(getCodeSnippet(iarea));
   for (i = 1; i < idno; i++) {
     originalQ = originalQ.replace(pattern, "(" + document.getElementById("c" + i).value + ")");
   }
